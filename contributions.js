@@ -39,7 +39,7 @@ function getTopCorporateDonors(year){
 	.contributions
 	.aggregate(
 		{$match:{type: {$in: ["Other", "Corporation"]}}},
-		{$group:{_id: '$contributor', amount: {$sum: '$amount'}}},
+		{$group:{_id: {name:'$contributor', state: '$address.state'}, amount: {$sum: '$amount'}}},
 		{$sort: {amount: -1}},
 		{$limit: 10}
 	)
