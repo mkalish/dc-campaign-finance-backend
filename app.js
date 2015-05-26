@@ -12,6 +12,19 @@ var candidateController = require('./api/candidate/candidate.controller');
 server.get('/dc-campaign-finance/api/candidate/:id', candidateController.getCandidateById);
 server.get('/dc-campaign-finance/api/electedOfficials/:year', candidateController.getElectedOfficials);
 
+// Company
+var companyController = require('./api/company/company.controller');
+server.get('/dc-campaign-finance/api/company/:id', companyController.getCompanyInformation);
+server.get('/dc-campaign-finance/api/company/contributors/:limit', companyController.getTopContributingCompanies);
+
+// Election
+var electionController = require('./api/election/election.controller');
+server.get('/dc-campaign-finance/api/electionCountdown', electionController.getNextElection);
+
+// Contribution
+var contributionController = require('./api/contribution/contribution.controller');
+server.get('/dc-campaign-finance/api/individual/contributors/:limit', contributionController.getTopIndividaulContributors);
+
 server.listen(process.env.PORT || 3000, function(){
     console.log('%s listening at %s', server.name, server.url);
 });

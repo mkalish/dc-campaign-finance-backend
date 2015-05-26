@@ -1,5 +1,3 @@
-var ObjectId = require('mongoose').Types.ObjectId;
-
 var Promise = require('bluebird');
 
 var Candidate = require('../../models/candidate');
