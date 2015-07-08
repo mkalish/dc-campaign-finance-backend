@@ -18,6 +18,13 @@ exports.findCandidate = function(candidateId) {
   });
 }
 
+exports.searchForCandidate = function(search) {
+  return Candidate.findAsync(
+    {$text: {$search: search}},
+    { score : { $meta: "textScore" } }
+  );
+}
+
 exports.findElectedCandidates = function(year) {
   return Candidate.findAsync({positions: {$elemMatch: {'period.from': 2014}}});
 }

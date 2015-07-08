@@ -32,8 +32,11 @@ exports.findCompanyDetails = function(companyId) {
   return Company.findByIdAsync(companyId);
 }
 
-exports.searchForCompnay = function(search) {
-
+exports.searchForCompany = function(search) {
+  return Company.findAsync(
+      { $text: {$search: search}},
+      { score : { $meta: "textScore" } }
+    );
 }
 
 exports.getOpenCorporateData = function(companyId) {
