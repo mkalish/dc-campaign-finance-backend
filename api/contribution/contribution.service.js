@@ -11,11 +11,11 @@ var Contribution = require('../../models/contribution');
 Promise.promisifyAll(Contribution);
 
 //Company model
-var Company = require('../../models/company');
-Promise.promisifyAll(Company);
+var Contributor = require('../../models/contributor');
+Promise.promisifyAll(Contributor);
 
 // Company service
-var companyService = require('../company/company.service');
+var contributorService = require('../contributor/contributor.service');
 
 exports.findTopContributingCompanies = function(limit, year) {
   return Contribution
@@ -26,7 +26,7 @@ exports.findTopContributingCompanies = function(limit, year) {
         {$limit: 10})
       .then(function(results){
         var populatedCompanies = _.map(results, function(result){
-          return companyService
+          return contributorService
             .findCompanyDetails(result._id)
             .then(function(company){
               result.company = company;
@@ -55,7 +55,7 @@ exports.addContribution = function(contribution) {
 }
 
 function populateCompanyPromise(id, amount) {
-  return companyService
+  return contributorService
     .findCompanyDetails(id)
     .then(function(company) {
       var data = {};

@@ -1,3 +1,9 @@
+'use strict';
+
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+
+var config = require('./config/environment');
+
 // Restify
 var restify = require('restify');
 var server = restify.createServer({name: 'dc-campaign-finance'});
@@ -5,7 +11,7 @@ server.use(restify.queryParser());
 
 //Mongoose
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/dc-campaign-finance-new');
+mongoose.connect(config.mongo.uri);
 
 // Candidate
 var candidateController = require('./api/candidate/candidate.controller');
@@ -14,10 +20,10 @@ server.get('/dc-campaign-finance/api/electedOfficials/:year', candidateControlle
 server.get('/dc-campaign-finance/api/search/candidate', candidateController.searchForCandidate);
 
 // Company
-var companyController = require('./api/company/company.controller');
-server.get('/dc-campaign-finance/api/company/:id', companyController.getCompanyInformation);
-server.get('/dc-campaign-finance/api/company/contributors/:limit', companyController.getTopContributingCompanies);
-server.get('/dc-campaign-finance/api/search/company', companyController.searchForCompany);
+var contributorController = require('./api/contributor/contributor.controller');
+server.get('/dc-campaign-finance/api/company/:id', contributorController.getCompanyInformation);
+server.get('/dc-campaign-finance/api/company/contributors/:limit', contributorController.getTopContributingCompanies);
+server.get('/dc-campaign-finance/api/search/company', contributorController.searchForCompany);
 
 // Election
 var electionController = require('./api/election/election.controller');

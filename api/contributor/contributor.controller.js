@@ -1,5 +1,5 @@
 // Company Service
-var companyService = require('./company.service');
+var companyService = require('./contributor.service');
 
 // Contributor Service
 var contributionService = require('../contribution/contribution.service');

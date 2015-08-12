@@ -16,8 +16,8 @@ var oldDb = pmongo('mongodb://localhost/dc-campaign-finance', ['candidates', 'co
 var Award = require('../models/award');
 var Candidate = require('../models/candidate');
 Promise.promisifyAll(Candidate);
-var Company = require('../models/company');
-Promise.promisifyAll(Company);
+var Contributor = require('../models/contributor');
+Promise.promisifyAll(Contributor);
 var Contribution = require('../models/contribution');
 Promise.promisifyAll(Contribution);
 
@@ -73,6 +73,9 @@ process.on("unhandledRejection", function(reason, promise) {
   //       console.log('finish processing');
   //       mongoose.disconnect();
   //     })
+  //   })
+  //   .catch(function(err){
+  //     console.log('errr', rr);
   //   });
 
   oldDb
@@ -91,7 +94,7 @@ process.on("unhandledRejection", function(reason, promise) {
         console.log('finish procesing');
         mongoose.disconnect();
       })
-    })
+    });
 
 function processOldCandidateRecord(record, callback) {
   var name = record._id;
@@ -144,31 +147,29 @@ function processOldCandidateRecord(record, callback) {
 }
 
 function processCompany(record, callback) {
-  if(record.type !== 'Individual') {
-    Company
+  Contributor
       .findOne({name: record.contributor})
       .exec()
-      .then(function(company){
-        if(!company) {
-          company = new Company({name: record.contributor});
+      .then(function(contributor){
+        if(!contributor) {
+          contributor = new Contributor({name: record.contributor});
         }
-
-        company.address = {};
-        company.address.street = record.address.line_one;
-        company.address.zip = record.address.zip;
-        company.address.state = record.address.state;
-        company.address.city = record.address.city;
-
-        company.save(function(err){
+        console.log(record);
+        contributor.address = {};
+        contributor.address.street = record.address.line_one;
+        contributor.address.zip = record.address.zip;
+        contributor.address.state = record.address.state;
+        contributor.address.city = record.address.city;
+        contributor.contributionType = record.type;
+        contributor.save(function(err){
           callback(null);
         });
 
       }, function(err){
-        console.log(err, ' found a duplicate.')
+        console.log(record.contributor);
+        console.log(err, ' found a duplicate.');
+        callback(null);
       });
-  } else {
-    callback(null);
-  }
 }
 
 function processContribution(record, callback) {
@@ -177,31 +178,30 @@ function processContribution(record, callback) {
   contribution.amount = record.amount;
 
   var candidatePromise = findCandidatePromise(record.candidate, record.candidate_committee);
-  if(record.type === 'Individual') {
-    contribution.contributorType = 'Individual';
-    var companyPromise = Promise.resolve(record.contributor);
-  } else {
-    contribution.contributorType = 'Corporate';
-    var companyPromise = findCompanyPromise(record.contributor);
-  }
+  var contributorPromise = findContributorPromise(record.contributor);
 
-  companyPromise
-    .then(function(company) {
-      contribution.contributorName = company._id ? company._id : company;
+
+  contributorPromise
+    .then(function(contributor) {
+      if(contributor) {
+        contribution.contributor = contributor._id;
+      }
       return candidatePromise;
     }, function(err){
       console.log('Error', err);
       callback(null);
     })
     .then(function(candidate){
+      console.log(candidate);
       if(candidate) {
         contribution.candidate = candidate._id;
         if(candidate.campaigns && candidate.campaigns[0]) {
           contribution.contributionType = { _id: candidate.campaigns[0]._id, name: 'campaign'};
         }
-        if(contribution.candidate) {
+        if(contribution.candidate && contribution.contributor) {
           console.log('attempting save');
           contribution.save(function(err) {
+            if(err) { console.log(err);}
             console.log('saved');
             callback(null);
           });
@@ -278,8 +278,8 @@ function findCandidatePromise(oldName, committee) {
             .exec();
 }
 
-function findCompanyPromise(lookup) {
-  return Company
+function findContributorPromise(lookup) {
+  return Contributor
           .findOne({name: lookup})
           .exec();
 }

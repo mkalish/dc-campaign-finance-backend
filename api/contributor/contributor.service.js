@@ -5,8 +5,8 @@ var Promise = require('bluebird');
 var ObjectId = require('mongoose').Types.ObjectId;
 
 // Company
-var Company = require('../../models/company');
-Promise.promisifyAll(Company);
+var Contributor = require('../../models/contributor');
+Promise.promisifyAll(Contributor);
 
 // Contribution
 var Contribution = require('../../models/contribution');
@@ -14,7 +14,7 @@ Promise.promisifyAll(Contribution);
 
 
 exports.findCompany =  function(companyId) {
-  var companyPromise = Company.findByIdAsync(companyId);
+  var companyPromise = Contributor.findByIdAsync(companyId);
 
   var companyObjectId = new ObjectId(companyId);
   var contributionPromise = Contribution.findAsync({ contributorName: companyObjectId });
@@ -29,11 +29,11 @@ exports.findCompany =  function(companyId) {
 }
 
 exports.findCompanyDetails = function(companyId) {
-  return Company.findByIdAsync(companyId);
+  return Contributor.findByIdAsync(companyId);
 }
 
 exports.searchForCompany = function(search) {
-  return Company.findAsync(
+  return Contributor.findAsync(
       { $text: {$search: search}},
       { score : { $meta: "textScore" } }
     );
